@@ -1,0 +1,434 @@
+// Given a linked list containing ‘N’ head nodes where every node in the linked list contains two pointers:
+// ‘Next’ points to the next node in the list
+// ‘Child’ pointer to a linked list where the current node is the head
+
+class Node {
+public:
+    int data;
+    Node *next;
+    Node *child;
+
+    // Constructors to initialize the
+    // data, next, and child pointers
+    Node() : data(0), next(nullptr), child(nullptr) {};
+    Node(int x) : data(x), next(nullptr), child(nullptr) {}
+    Node(int x, Node *nextNode, Node *childNode) : data(x), next(nextNode), child(childNode) {}
+};
+
+// Merges two linked lists in a particular
+// order based on the data value
+Node* merge(Node* list1, Node* list2){
+    // Create a dummy node as a
+    // placeholder for the result
+    Node* dummyNode = new Node(-1);
+    Node* res = dummyNode;
+
+    // Merge the lists based on data values
+    while(list1 != NULL && list2 != NULL){
+        if(list1->data < list2->data){
+            res->child = list1;
+            res = list1;
+            list1 = list1->child;
+        }
+        else{
+            res->child = list2;
+            res = list2;
+            list2 = list2->child;
+        }
+        res->next = NULL;
+    }
+
+    // Connect the remaining
+    // elements if any
+    if(list1){
+        res->child = list1;
+    } else {
+        res->child = list2;
+    }
+
+    // Break the last node's
+    // link to prevent cycles
+    if(dummyNode->child){
+        dummyNode->child->next = NULL;
+    }
+
+    return dummyNode->child;
+}
+
+// Flattens a linked list with child pointers
+Node* flattenLinkedList(Node* head){
+    // If head is null or there 
+    // is no next node, return head
+    if(head == NULL || head->next == NULL){
+        return head;
+    }
+
+    // Recursively flatten the
+    // rest of the linked list
+    Node* mergedHead = flattenLinkedList(head->next);
+    head = merge(head, mergedHead);
+    return head;
+}
+
+// Print the linked list by
+// traversing through child pointers
+void printLinkedList(Node* head) {
+    while (head != nullptr) {
+        cout << head->data << " ";
+        head = head->child;
+    }
+    cout << endl;
+}
+
+// Print the linked list
+// in a grid-like structure
+void printOriginalLinkedList(Node* head, int depth) {
+    while (head != nullptr) {
+        cout << head->data;
+
+        // If child exists, recursively
+        // print it with indentation
+        if (head->child) {
+            cout << " -> ";
+            printOriginalLinkedList(head->child, depth + 1);
+        }
+
+        // Add vertical bars
+        // for each level in the grid
+        if (head->next) {
+            cout << endl;
+            for (int i = 0; i < depth; ++i) {
+                cout << "| ";
+            }
+        }
+        head = head->next;
+    }
+}
+
+
+//Rotate a Linked List
+node* rotateRight(node* head,int k) {
+    if(head == NULL||head->next == NULL||k == 0) return head;
+    //calculating length
+    node* temp = head;
+    int length = 1;
+    while(temp->next != NULL) {
+        ++length;
+        temp = temp->next;
+    }
+    //link last node to first node
+    temp->next = head;
+    k = k%length; //when k is more than length of list
+    int end = length-k; //to get end of the list
+    while(end--) temp = temp->next;
+    //breaking last node link and pointing to NULL
+    head = temp->next;
+    temp->next = NULL;
+        
+    return head;
+}
+
+//utility function to print list
+void printList(node* head) {
+    while(head->next != NULL) {
+        cout<<head->num<<"->";
+        head = head->next;
+    } 
+    cout<<head->num<<endl;
+    return;
+}
+
+
+
+// Given the head of a singly linked list of `n` nodes and an integer `k`, 
+where k is less than or equal to `n`. Your task is to reverse the order of each group of `k`
+ consecutive nodes, if `n` is not divisible by `k`, then the last group of remaining nodes 
+ should remain unchanged.
+ // Node class represents a
+// node in a linked list
+class Node {
+public:
+    // Data stored in the node
+    int data;   
+    
+    // Pointer to the next node in the list
+    Node* next;      
+
+    // Constructor with both data and
+    // next node as parameters
+    Node(int data1, Node* next1) {
+        data = data1;
+        next = next1;
+    }
+
+    // Constructor with only data as a
+    // parameter, sets next to nullptr
+    Node(int data1) {
+        data = data1;
+        next = nullptr;
+    }
+};
+
+// This function has been explained
+// in previous videos/articles
+
+// Function to reverse a linked list
+// using the 3-pointer approach
+Node* reverseLinkedList(Node *head)
+{
+   // Initialize'temp' at
+   // head of linked list
+   Node* temp = head;  
+   
+   // Initialize pointer 'prev' to NULL,
+   // representing the previous node
+   Node* prev = NULL;  
+   
+   // Traverse the list, continue till
+   // 'temp' reaches the end (NULL)
+   while(temp != NULL){  
+       // Store the next node in
+       // 'front' to preserve the reference
+       Node* front = temp->next;  
+       
+       // Reverse the direction of the
+       // current node's 'next' pointer
+       // to point to 'prev'
+       temp->next = prev;  
+       
+        // Move 'prev' to the current
+        // node for the next iteration
+       prev = temp;  
+       
+        // Move 'temp' to the 'front' node
+        // advancing the traversal
+       temp = front; 
+   }
+   
+   // Return the new head of
+   // the reversed linked list
+   return prev;  
+}
+
+// Function to get the Kth node from
+// a given position in the linked list
+Node* getKthNode(Node* temp, int k){
+    // Decrement K as we already
+    // start from the 1st node
+    k -= 1; 
+
+    // Decrement K until it reaches
+    // the desired position
+    while(temp != NULL && k > 0){
+        // Decrement k as temp progresses
+        k--; 
+        
+        // Move to the next node
+        temp = temp -> next; 
+    }
+    
+    // Return the Kth node
+    return temp; 
+}
+
+// Function to reverse nodes in groups of K
+Node* kReverse(Node* head, int k){
+    // Initialize a temporary
+    // node to traverse the list
+    Node* temp = head; 
+
+    // Initialize a pointer to track the
+    // ;ast node of the previous group
+    Node* prevLast = NULL; 
+    
+    // Traverse through the linked list
+    while(temp != NULL){
+        // Get the Kth node of the current group
+        Node* kThNode = getKthNode(temp, k); 
+
+        // If the Kth node is NULL
+        // (not a complete group)
+        if(kThNode == NULL){
+            // If there was a previous group,
+            // link the last node to the current node
+            if(prevLast){
+                prevLast -> next = temp; 
+            }
+            
+            // Exit the loop
+            break; 
+        }
+        
+        // Store the next node
+        // after the Kth node
+        Node* nextNode = kThNode -> next; 
+
+        // Disconnect the Kth node
+        // to prepare for reversal
+        kThNode -> next = NULL; 
+
+        // Reverse the nodes from
+        // temp to the Kth node
+        reverseLinkedList(temp); 
+        
+        // Adjust the head if the reversal
+        // starts from the head
+        if(temp == head){
+            head = kThNode;
+        }else{
+            // Link the last node of the previous
+            // group to the reversed group
+            prevLast -> next = kThNode; 
+        }
+
+        // Update the pointer to the
+        // last node of the previous group
+        prevLast = temp; 
+
+        // Move to the next group
+        temp = nextNode; 
+    }
+    
+    // Return the head of the
+    // modified linked list
+    return head; 
+}
+
+// Function to print the linked list
+void printLinkedList(Node* head) {
+    Node* temp = head;
+    while (temp != nullptr) {
+        cout << temp->data << " ";
+        temp = temp->next;
+    }
+    cout << endl;
+}
+
+
+// Clone Linked List with Random and Next Pointer
+// Node class to represent
+// elements in the linked list
+class Node {
+public:
+    // Data stored in the node
+    int data;           
+     // Pointer to the next node
+    Node *next;        
+    // Pointer to a random
+    // node in the list
+    Node *random;       
+
+    // Constructors for Node class
+    Node() : data(0), next(nullptr), random(nullptr){}; 
+    Node(int x) : data(x), next(nullptr), random(nullptr) {} 
+    // Constructor with data,
+    // next, and random pointers
+    Node(int x, Node *nextNode, Node *randomNode) :
+            data(x), next(nextNode), random(randomNode) {}  
+};
+
+// Function to insert a copy of each
+// node in between the original nodes
+void insertCopyInBetween(Node* head){
+    Node* temp = head;
+    while(temp != NULL){
+        Node* nextElement = temp->next;
+        // Create a new node with the same data
+        Node* copy = new Node(temp->data);  
+        
+        // Point the copy's next to
+        // the original node's next
+        copy->next = nextElement;  
+        
+        // Point the original
+        // node's next to the copy
+        temp->next = copy;         
+
+        // Move to the next original node
+        temp = nextElement;         
+    }
+}
+
+// Function to connect random
+// pointers of the copied nodes
+void connectRandomPointers(Node* head){
+    Node* temp = head;
+    while(temp != NULL){
+        // Access the copied node
+        Node* copyNode = temp->next;    
+        
+        // If the original node
+        // has a random pointer
+        if(temp->random){   
+             // Point the copied node's random to the
+             // corresponding copied random node
+            copyNode->random = temp->random->next; 
+        }
+        else{
+             // Set the copied node's random to
+             // null if the original random is null
+            copyNode->random = NULL;   
+        }
+        
+         // Move to the next original node
+        temp = temp->next->next;   
+    }
+}
+
+// Function to retrieve the
+// deep copy of the linked list
+Node* getDeepCopyList(Node* head){
+    Node* temp = head;
+     // Create a dummy node
+    Node* dummyNode = new Node(-1);   
+    // Initialize a result pointer
+    Node* res = dummyNode;             
+
+    while(temp != NULL){
+        // Creating a new List by
+        // pointing to copied nodes
+        res->next = temp->next;
+        res = res->next;
+
+        // Disconnect and revert back to the
+        // initial state of the original linked list
+        temp->next = temp->next->next;
+        temp = temp->next;
+    }
+    
+     // Return the deep copy of the
+     // list starting from the dummy node
+    return dummyNode->next;   
+}
+
+// Function to clone the linked list
+Node *cloneLL(Node *head){
+    // If the original list
+    // is empty, return null
+    if(!head) return nullptr;   
+    
+     // Step 1: Insert copy of
+     // nodes in between
+    insertCopyInBetween(head); 
+    // Step 2: Connect random
+    // pointers of copied nodes
+    connectRandomPointers(head);  
+    // Step 3: Retrieve the deep
+    // copy of the linked list
+    return getDeepCopyList(head); 
+}
+
+// Function to print the cloned linked list
+void printClonedLinkedList(Node *head) {
+    while (head != nullptr) {
+        cout << "Data: " << head->data;
+        if (head->random != nullptr) {
+            cout << ", Random: " << head->random->data;
+        } else {
+            cout << ", Random: nullptr";
+        }
+        cout << endl;
+         // Move to the next node
+        head = head->next;  
+    }
+}

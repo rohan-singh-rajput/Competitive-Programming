@@ -1,0 +1,1409 @@
+// Function to flatten a binary tree
+// to a right next Linked List structure
+    void flatten(TreeNode* root) {
+        // Initialize a pointer
+        // 'curr' to the root of the tree
+        TreeNode* curr = root;
+
+        // Iterate until 'curr'
+        // becomes NULL
+        while (curr) {
+            // Check if the current
+            // node has a left child
+            if (curr->left) {
+                // If yes, find the rightmost
+                // node in the left subtree
+                TreeNode* pre = curr->left;
+                while (pre->right) {
+                    pre = pre->right;
+                }
+
+                // Connect the rightmost node in
+                // the left subtree to the current
+               //  node's right child
+                pre->right = curr->right;
+
+                // Move the entire left subtree to the
+                // right child of the current node
+                curr->right = curr->left;
+
+                // Set the left child of
+                // the current node to NULL
+                curr->left = NULL;
+            }
+
+            // Move to the next node
+            // on the right side
+            curr = curr->right;
+        }
+    }
+};
+// Print the preorder traversal of the
+// Orignal Binary Tree
+void printPreorder(TreeNode* root){
+    if(!root){
+        return;
+    }
+    cout << root->val << " ";
+    printPreorder(root->left);
+    printPreorder(root->right);
+}
+
+// Print the Binary Tree along the 
+// Right Pointers after Flattening
+void printFlattenTree(TreeNode* root){
+    if(!root){
+        return;
+    }
+    cout << root->val << " ";
+    printFlattenTree(root->right);
+}
+
+
+// Given a Binary Tree, implement Morris Inorder Traversal and return the array containing its inorder sequence.
+ // Function to perform iterative Morris
+    // inorder traversal of a binary tree
+    vector<int> getInorder(TreeNode* root) {
+        // Vector to store the
+        // inorder traversal result
+        vector<int> inorder;
+        // Pointer to the current node,
+        // starting from the root
+        TreeNode* cur = root;
+        
+        // Loop until the current
+        // node is not NULL
+        while (cur != NULL) {
+            // If the current node's
+            // left child is NULL
+            if (cur->left == NULL) {
+                // Add the value of the current
+                // node to the inorder vector
+                inorder.push_back(cur->val);
+                // Move to the right child
+                cur = cur->right;
+            } else {
+                // If the left child is not NULL,
+                // find the predecessor (rightmost node
+                // in the left subtree)
+                TreeNode* prev = cur->left;
+                while (prev->right && prev->right != cur) {
+                    prev = prev->right;
+                }
+                
+                // If the predecessor's right child
+                // is NULL, establish a temporary link
+                // and move to the left child
+                if (prev->right == NULL) {
+                    prev->right = cur;
+                    cur = cur->left;
+                } else {
+                    // If the predecessor's right child
+                    // is already linked, remove the link,
+                    // add current node to inorder vector,
+                    // and move to the right child
+                    prev->right = NULL;
+                    inorder.push_back(cur->val);
+                    cur = cur->right;
+                }
+            }
+        }
+        
+        // Return the inorder
+        // traversal result
+        return inorder;
+    }
+
+
+    // serialize and deserialize a binary tree
+    // Encodes the tree into a single string
+    string serialize(TreeNode* root) {
+        // Check if the tree is empty
+        if (!root) {
+            return "";
+        }
+
+        // Initialize an empty string
+        // to store the serialized data
+        string s = "";
+        // Use a queue for
+        // level-order traversal
+        queue<TreeNode*> q;
+        // Start with the root node
+        q.push(root);
+
+        // Perform level-order traversal
+        while (!q.empty()) {
+            // Get the front node in the queue
+            TreeNode* curNode = q.front();
+            q.pop();
+
+            // Check if the current node is
+            // null and append "#" to the string
+            if (curNode == nullptr) {
+                s += "#,";
+            } else {
+                // Append the value of the
+                // current node to the string
+                s += to_string(curNode->val) + ",";
+                // Push the left and right children
+                // to the queue for further traversal
+                q.push(curNode->left);
+                q.push(curNode->right);
+            }
+        }
+
+        // Return the
+        // serialized string
+        return s;
+    }
+
+    // Decode the encoded
+    // data to a tree
+    TreeNode* deserialize(string data) {
+        // Check if the
+        // serialized data is empty
+        if (data.empty()) {
+            return nullptr;
+        }
+
+        // Use a stringstream to
+        // tokenize the serialized data
+        stringstream s(data);
+        string str;
+        // Read the root value
+        // from the serialized data
+        getline(s, str, ',');
+        TreeNode* root = new TreeNode(stoi(str));
+
+        // Use a queue for 
+        // level-order traversal
+        queue<TreeNode*> q;
+        // Start with the root node
+        q.push(root);
+
+        // Perform level-order traversal
+        // to reconstruct the tree
+        while (!q.empty()) {
+            // Get the front node in the queue
+            TreeNode* node = q.front();
+            q.pop();
+
+            // Read the value of the left
+            // child from the serialized data
+            getline(s, str, ',');
+            // If the value is not "#", create a new
+            // left child and push it to the queue
+            if (str != "#") {
+                TreeNode* leftNode = new TreeNode(stoi(str));
+                node->left = leftNode;
+                q.push(leftNode);
+            }
+
+            // Read the value of the right child
+            // from the serialized data
+            getline(s, str, ',');
+            // If the value is not "#", create a
+            // new right child and push it to the queue
+            if (str != "#") {
+                TreeNode* rightNode = new TreeNode(stoi(str));
+                node->right = rightNode;
+                q.push(rightNode);
+            }
+        }
+
+        // Return the reconstructed
+        // root of the tree
+        return root;
+    }
+
+
+
+    // Given the Postorder and Inorder traversal of a Binary Tree, construct the Unique Binary Tree represented by them.
+    // TreeNode structure
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    // Function to build a binary tree
+    // from inorder and postorder traversals
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        if (inorder.size() != postorder.size()) {
+            return NULL;
+        }
+
+        // Create a map to store the indices
+        // of elements in the inorder traversal
+        map<int, int> hm;
+        for (int i = 0; i < inorder.size(); i++) {
+            hm[inorder[i]] = i;
+        }
+
+        // Call the recursive function
+        // to build the binary tree
+        return buildTreePostIn(inorder, 0, inorder.size() - 1, postorder, 0,
+            postorder.size() - 1, hm);
+    }
+
+    // Recursive function to build a binary
+    // tree from inorder and postorder traversals
+    TreeNode* buildTreePostIn(vector<int>& inorder, int is, int ie,
+        vector<int>& postorder, int ps, int pe, map<int, int>& hm) {
+
+        // Base case: If the subtree
+        // is empty, return NULL
+        if (ps > pe || is > ie) {
+            return NULL;
+        }
+
+        // Create a new TreeNode
+        // with the root value from postorder
+        TreeNode* root = new TreeNode(postorder[pe]);
+
+        // Find the index of the root
+        // value in inorder traversal
+        int inRoot = hm[postorder[pe]];
+        
+        // Number of nodes in the left subtree
+        int numsLeft = inRoot - is; 
+
+        // Recursively build the
+        // left and right subtrees
+        root->left = buildTreePostIn(inorder, is, inRoot - 1, postorder,
+            ps, ps + numsLeft - 1, hm);
+
+        root->right = buildTreePostIn(inorder, inRoot + 1, ie, postorder,
+            ps + numsLeft, pe - 1, hm);
+
+        // Return the root of
+        // the constructed subtree
+        return root;
+    }
+};
+
+// Function to print the
+// inorder traversal of a tree
+void printInorder(TreeNode* root) {
+    if (!root) {
+        return;
+    }
+    printInorder(root->left);
+    cout << root->val << " ";
+    printInorder(root->right);
+}
+
+// Function to print the given vector
+void printVector(vector<int>& vec) {
+    for (int i = 0; i < vec.size(); i++) {
+        cout << vec[i] << " ";
+    }
+    cout << endl;
+}
+
+// Given the Preorder and Inorder traversal of a Binary Tree, construct the Unique Binary Tree represented by them.
+
+
+// TreeNode structure
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    // Function to build a binary tree
+    // from preorder and inorder traversals
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder){
+        // Create a map to store indices
+        // of elements in the inorder traversal
+        map<int, int> inMap;
+        
+        // Populate the map with indices
+        // of elements in the inorder traversal
+        for(int i = 0; i < inorder.size(); i++){
+            inMap[inorder[i]] = i;
+        }
+        
+        // Call the private helper function
+        // to recursively build the tree
+        TreeNode* root = buildTree(preorder, 0, preorder.size()-1, inorder, 0, inorder.size()-1, inMap);
+        
+        return root;
+    }
+
+private:
+    // Recursive helper function to build the tree
+    TreeNode* buildTree(vector<int>& preorder, int preStart, int preEnd, 
+            vector<int>& inorder, int inStart, int inEnd, map<int, int>& inMap){
+                // Base case: If the start indices 
+                // exceed the end indices, return NULL
+                if(preStart > preEnd || inStart > inEnd){
+                    return NULL;
+                }
+                
+                // Create a new TreeNode with value
+                // at the current preorder index
+                TreeNode* root = new TreeNode(preorder[preStart]);
+                
+                // Find the index of the current root
+                // value in the inorder traversal
+                int inRoot = inMap[root->val];
+                
+                // Calculate the number of
+                // elements in the left subtree
+                int numsLeft = inRoot - inStart;
+                
+                // Recursively build the left subtree
+                root->left = buildTree(preorder, preStart + 1, preStart + numsLeft, 
+                                inorder, inStart, inRoot - 1, inMap);
+                
+                // Recursively build the right subtree
+                root->right = buildTree(preorder, preStart + numsLeft + 1, preEnd, 
+                                inorder, inRoot + 1, inEnd, inMap);
+                
+                // Return the current root node
+                return root;
+            }
+};
+
+// Function to print the
+// inorder traversal of a tree
+void printInorder(TreeNode* root){
+    if(!root){
+        return;
+    }
+    printInorder(root->left);
+    cout << root->val << " ";
+    printInorder(root->right);
+}
+
+// Function to print the 
+// given vector
+void printVector(vector<int>&vec){
+    for(int i = 0; i < vec.size(); i++){
+        cout << vec[i] << " ";
+    }
+    cout << endl;
+}
+
+
+// Given a Complete Binary Tree, count and return the number of nodes in the given tree. 
+//A Complete Binary Tree is a binary tree in which all levels are completely filled, 
+// except possibly for the last level, and all nodes are as left as possible.
+// TreeNode structure
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+
+
+class Solution {
+public:
+    // Function to count nodes
+    // in a binary tree
+    int countNodes(TreeNode* root) {
+        // Base case: If the root
+        // is NULL, there are no nodes
+        if (root == NULL) {
+            return 0;
+        }
+        
+        // Find the left height and
+        // right height of the tree
+        int lh = findHeightLeft(root);
+        int rh = findHeightRight(root);
+        
+        // Check if the last level
+        // is completely filled
+        if (lh == rh) {
+            // If so, use the formula for
+            // total nodes in a perfect
+            // binary tree ie. 2^h - 1
+            return (1 << lh) - 1; 
+        }
+        
+        // If the last level is not completely
+        // filled, recursively count nodes in
+        // left and right subtrees
+        return 1 + countNodes(root->left) + countNodes(root->right);
+    }
+    
+    // Function to find the left height of a tree
+    int findHeightLeft(TreeNode* node) {
+        int height = 0;
+        // Traverse left child until
+        // reaching the leftmost leaf
+        while (node) {
+            height++;
+            node = node->left;
+        }
+        return height;
+    }
+    
+    // Function to find the right height of a tree
+    int findHeightRight(TreeNode* node) {
+        int height = 0;
+        // Traverse right child until
+        // reaching the rightmost leaf
+        while (node) {
+            height++;
+            node = node->right;
+        }
+        return height;
+    }
+};
+
+
+// Given the root of a binary tree, the value of a target node target, and an integer k,
+// return an array of the values of all nodes that have a distance k from the target node.
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> res;
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        int x=node2root(root,target,k);
+        return res;
+    }
+    int node2root(TreeNode* root, TreeNode* target, int k)
+    {
+        if(root == NULL)
+            return -1;
+        if(target->val == root->val)
+        {
+            kdown(root, NULL, k);
+            return 1;
+        }
+        int l = node2root(root->left, target, k);
+        if(l != -1)
+        {
+            kdown(root, root->left, k - l);
+            return l + 1;
+        }
+        int r = node2root(root->right, target, k);
+        if(r != -1)
+        {
+            kdown(root, root->right, k - r);
+            return r + 1;
+        }
+        return -1;
+    }
+    void kdown(TreeNode* root,TreeNode* block,int k)
+    {
+        if(root == NULL || root == block || k < 0)
+            return;
+        if(k == 0)
+        {
+            res.push_back(root->val);
+            return;
+        }
+        kdown(root->left, block, k-1);
+        kdown(root->right, block, k-1);
+        
+    }
+};
+
+// Given a Binary Tree, convert the value of its nodes to follow the Children Sum Property. 
+// The Children Sum Property in a binary tree states that for every node, 
+// the sum of its children's values (if they exist) should be equal to the node's value. 
+// If a child is missing, it is considered as having a value of 0.
+
+// TreeNode structure
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    // Function to change the values of the nodes
+    // based on the sum of its children's values.
+    void changeTree(TreeNode* root) {
+        // Base case: If the current node
+        // is NULL, return and do nothing.
+        if (root == NULL) {
+            return;
+        }
+
+        // Calculate the sum of the values of
+        // the left and right children, if they exist.
+        int child = 0;
+        if (root->left) {
+            child += root->left->val;
+        }
+        if (root->right) {
+            child += root->right->val;
+        }
+
+        // Compare the sum of children with
+        // the current node's value and update
+        if (child >= root->val) {
+            root->val = child;
+        } else {
+            // If the sum is smaller, update the
+            // child with the current node's value.
+            if (root->left) {
+                root->left->val = root->val;
+            } else if (root->right) {
+                root->right->val = root->val;
+            }
+        }
+
+        // Recursively call the function
+        // on the left and right children.
+        changeTree(root->left);
+        changeTree(root->right);
+
+        // Calculate the total sum of the
+        // values of the left and right
+        // children, if they exist.
+        int tot = 0;
+        if (root->left) {
+            tot += root->left->val;
+        }
+        if (root->right) {
+            tot += root->right->val;
+        }
+
+        // If either left or right child
+        // exists, update the current node's
+        // value with the total sum.
+        if (root->left or root->right) {
+            root->val = tot;
+        }
+    }
+};
+
+
+// Function to print the inorder
+// traversal of the tree
+void inorderTraversal(TreeNode* root) {
+    if (root == nullptr) {
+        return;
+    }
+    inorderTraversal(root->left);
+    cout << root->val << " ";
+    inorderTraversal(root->right);
+}
+
+
+// Given a Binary Tree, return its maximum width.
+class Solution {
+public:
+    // Function widthOfBinaryTree to find the 
+    // maximum width of the Binary Tree
+    int widthOfBinaryTree(TreeNode* root) {
+        // If the root is null,
+        // the width is zero
+        if (!root) {
+            return 0;
+        }
+
+        // Initialize a variable 'ans'
+        // to store the maximum width
+        int ans = 0;
+
+        // Create a queue to perform level-order
+        // traversal, where each element is a pair
+        // of TreeNode* and its position in the level
+        queue<pair<TreeNode*, int>> q;
+        // Push the root node and its
+        // position (0) into the queue
+        q.push({root, 0});
+
+        // Perform level-order traversal
+        while (!q.empty()) {
+            // Get the number of
+            // nodes at the current level
+            int size = q.size();
+            // Get the position of the front
+            // node in the current level
+            int mmin = q.front().second;
+            
+            // Store the first and last positions 
+            // of nodes in the current level
+            int first, last;
+
+            // Process each node
+            // in the current level
+            for (int i = 0; i < size; i++) {
+                // Calculate current position relative
+                // to the minimum position in the level
+                int cur_id = q.front().second - mmin;
+                // Get the current node
+                TreeNode* node = q.front().first;
+                // Pop the front node from the queue
+                q.pop();
+
+                // If this is the first node in the level, 
+                // update the 'first' variable
+                if (i == 0) {
+                    first = cur_id;
+                }
+
+                // If this is the last node in the level,
+                // update the 'last' variable
+                if (i == size - 1) {
+                    last = cur_id;
+                }
+
+                // Enqueue the left child of the 
+                // current node with its position
+                if (node->left) {
+                    q.push({node->left, cur_id * 2 + 1});
+                }
+
+                // Enqueue the right child of the
+                // current node with its position
+                if (node->right) {
+                    q.push({node->right, cur_id * 2 + 2});
+                }
+            }
+
+            // Update the maximum width by calculating
+            // the difference between the first and last
+            // positions, and adding 1
+            ans = max(ans, last - first + 1);
+        }
+
+        // Return the maximum
+        // width of the binary tree
+        return ans;
+    }
+};
+
+// Given a binary tree, Find the Lowest Common Ancestor for two given Nodes (x,y).
+
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        //base case
+        if (root == NULL || root == p || root == q) {
+            return root;
+        }
+        TreeNode* left = lowestCommonAncestor(root->left, p, q);
+        TreeNode* right = lowestCommonAncestor(root->right, p, q);
+
+        //result
+        if(left == NULL) {
+            return right;
+        }
+        else if(right == NULL) {
+            return left;
+        }
+        else { //both left and right are not null, we found our result
+            return root;
+        }
+    }
+};
+
+
+// Given a Binary Tree and a reference to a root belonging to it. Return the path from the root node to the given leaf node.
+
+No two nodes in the tree have the same data value.
+It is assured that the given node is present and a path always exists.
+
+ // Function to find the path from the
+    // root to a given node with value 'x'
+    bool getPath(TreeNode* root, vector<int>& arr, int x) {
+        // Base case: If the current
+        // node is null, return false
+        if (!root) {
+            return false;
+        }
+
+        // Add the current node's
+        // value to the path vector
+        arr.push_back(root->val);
+
+        // If the current node's value is equal
+        // to the target value 'x', return true
+        if (root->val == x) {
+            return true;
+        }
+
+        // Recursively search for the target value
+        // 'x' in the left and right subtrees
+        if (getPath(root->left, arr, x)
+            || getPath(root->right, arr, x)) {
+            return true;
+        }
+
+        // If the target value 'x' is not found
+        // in the current path, backtrack
+        arr.pop_back();
+        return false;
+    }
+
+    // Function to find and return the path from
+    // the root to a given node with value 'B'
+    vector<int> solve(TreeNode* A, int B) {
+        // Initialize an empty
+        // vector to store the path
+        vector<int> arr;
+
+        // If the root node is null,
+        // return the empty path vector
+        if (A == NULL) {
+            return arr;
+        }
+
+        // Call the getPath function to find
+        // the path to the node with value 'B'
+        getPath(A, arr, B);
+
+        // Return the path vector
+        return arr;
+    }
+
+
+// Given a Binary Tree, determine the maximum sum achievable along any path within the tree
+
+int findMaxPathSum(Node* root, int &maxi) {
+        // Base case: If the current node is null, return 0
+        if (root == nullptr) {
+            return 0;
+        }
+
+        // Calculate the maximum path sum
+        // for the left and right subtrees
+        int leftMaxPath = max(0, findMaxPathSum(root->left, maxi));
+        int rightMaxPath = max(0, findMaxPathSum(root->right, maxi));
+
+        // Update the overall maximum
+        // path sum including the current node
+        maxi = max(maxi, leftMaxPath + rightMaxPath + root->data);
+
+        // Return the maximum sum considering
+        // only one branch (either left or right)
+        // along with the current node
+        return max(leftMaxPath, rightMaxPath) + root->data;
+    }
+
+    // Function to find the maximum
+    // path sum for the entire binary tree
+    int maxPathSum(Node* root) {
+        // Initialize maxi to the
+        // minimum possible integer value
+        int maxi = INT_MIN; 
+         // Call the recursive function to
+         // find the maximum path sum
+        findMaxPathSum(root, maxi);
+        // Return the final maximum path sum
+        return maxi; 
+    }
+
+
+
+// Function to check if two
+    // binary trees are identical
+    bool isIdentical(Node* node1, Node* node2){
+        // If both nodes are NULL,
+        // they are identical
+        if(node1 == NULL && node2 == NULL){
+            return true;
+        }
+        // If only one of the nodes is
+        // NULL, they are not identical
+        if( node1== NULL || node2==NULL){
+            return false;
+        }
+        // Check if the current nodes
+        // have the same data value
+        // and recursively check their
+        // left and right subtrees
+        return ((node1->data == node2->data)
+            && isIdentical(node1->left, node2->left)
+                && isIdentical(node1->right, node2->right));
+    }
+
+
+  // Function to perform zigzag level
+    // order traversal of a binary tree
+    vector<vector<int>> ZigZagLevelOrder(Node* root){
+        // Vector to store the
+        // result of zigzag traversal
+        vector<vector<int>> result;
+        
+        // Check if the root is NULL,
+        // return an empty result
+        if(root == NULL){
+            return result;
+        }
+        
+        // Queue to perform
+        // level order traversal
+        queue<Node*> nodesQueue;
+        nodesQueue.push(root);
+        
+        // Flag to determine the direction of
+        // traversal (left to right or right to left)
+        bool leftToRight = true;
+        
+        // Continue traversal until
+        // the queue is empty
+        while(!nodesQueue.empty()){
+            // Get the number of nodes
+            // at the current level
+            int size = nodesQueue.size();
+            
+            // Vector to store the values
+            // of nodes at the current level
+            vector<int> row(size);
+            
+            // Traverse nodes at 
+            // the current level
+            for(int i = 0; i < size; i++){
+                // Get the front node
+                // from the queue
+                Node* node = nodesQueue.front();
+                nodesQueue.pop();
+                
+                // Determine the index to insert the node's
+                // value based on the traversal direction
+                int index = leftToRight ? i : (size - 1 - i);
+                
+                // Insert the node's value at
+                // the determined index
+                row[index] = node->data;
+                
+                // Enqueue the left and right
+                // children if they exist
+                if(node->left){
+                    nodesQueue.push(node->left);
+                }
+                if(node->right){
+                    nodesQueue.push(node->right);
+                }
+            }
+            
+            // Switch the traversal
+            // direction for the next level
+            leftToRight = !leftToRight;
+            
+            // Add the current level's
+            // values to the result vector
+            result.push_back(row);
+        }
+        
+        // Return the final result of
+        // zigzag level order traversal
+        return result;
+    }
+};
+// Helper function to print the result
+void printResult(const vector<vector<int>>& result) {
+    for (const auto& row : result) {
+        for (int val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+}
+
+
+//Given a Binary Tree, perform the boundary traversal of the tree.
+ The boundary traversal is the process of visiting the boundary nodes of the binary tree in the anticlockwise direction,
+  starting from the root.
+  // Function to check
+    // if a node is a leaf
+    bool isLeaf(Node* root) {
+        return !root->left && !root->right;
+    }
+
+    // Function to add the
+    // left boundary of the tree
+    void addLeftBoundary(Node* root, vector<int>& res) {
+        Node* curr = root->left;
+        while (curr) {
+            // If the current node is not a leaf,
+            // add its value to the result
+            if (!isLeaf(curr)) {
+                res.push_back(curr->data);
+            }
+            // Move to the left child if it exists,
+            // otherwise move to the right child
+            if (curr->left) {
+                curr = curr->left;
+            } else {
+                curr = curr->right;
+            }
+        }
+    }
+
+    // Function to add the
+    // right boundary of the tree
+    void addRightBoundary(Node* root, vector<int>& res) {
+        Node* curr = root->right;
+        vector<int> temp;
+        while (curr) {
+            // If the current node is not a leaf,
+            // add its value to a temporary vector
+            if (!isLeaf(curr)) {
+                temp.push_back(curr->data);
+            }
+            // Move to the right child if it exists,
+            // otherwise move to the left child
+            if (curr->right) {
+                curr = curr->right;
+            } else {
+                curr = curr->left;
+            }
+        }
+        // Reverse and add the values from
+        // the temporary vector to the result
+        for (int i = temp.size() - 1; i >= 0; --i) {
+            res.push_back(temp[i]);
+        }
+    }
+
+    // Function to add the
+    // leaves of the tree
+    void addLeaves(Node* root, vector<int>& res) {
+        // If the current node is a
+        // leaf, add its value to the result
+        if (isLeaf(root)) {
+            res.push_back(root->data);
+            return;
+        }
+        // Recursively add leaves of
+        // the left and right subtrees
+        if (root->left) {
+            addLeaves(root->left, res);
+        }
+        if (root->right) {
+            addLeaves(root->right, res);
+        }
+    }
+
+    // Main function to perform the
+    // boundary traversal of the binary tree
+    vector<int> printBoundary(Node* root) {
+        vector<int> res;
+        if (!root) {
+            return res;
+        }
+        // If the root is not a leaf,
+        // add its value to the result
+        if (!isLeaf(root)) {
+            res.push_back(root->data);
+        }
+
+        // Add the left boundary, leaves,
+        // and right boundary in order
+        addLeftBoundary(root, res);
+        addLeaves(root, res);
+        addRightBoundary(root, res);
+
+        return res;
+    }
+};
+
+// Helper function to
+// print the result
+void printResult(const vector<int>& result) {
+    for (int val : result) {
+        cout << val << " ";
+    }
+    cout << endl;
+}
+
+
+
+//Given a Binary Tree, return the Vertical Order Traversal of it starting from the Leftmost level to the Rightmost level. 
+If there are multiple nodes passing through a vertical line, then they should be printed as they appear in level order traversal of the tree.
+// Function to perform vertical order traversal
+    // and return a 2D vector of node values
+    vector<vector<int>> findVertical(Node* root){
+        // Map to store nodes based on
+        // vertical and level information
+        map<int, map<int, multiset<int>>> nodes;
+        
+        // Queue for BFS traversal, each
+        // element is a pair containing node
+        // and its vertical and level information
+        queue<pair<Node*, pair<int, int>>> todo;
+        
+        // Push the root node with initial vertical
+        // and level values (0, 0)
+        todo.push({root, {0, 0}});
+        
+        // BFS traversal
+        while(!todo.empty()){
+            // Retrieve the node and its vertical
+            // and level information from
+            // the front of the queue
+            auto p = todo.front();
+            todo.pop();
+            Node* temp = p.first;
+            
+            // Extract the vertical and level information
+            // x -> vertical
+            int x = p.second.first;  
+            // y -> level
+            int y = p.second.second; 
+            
+            // Insert the node value into the
+            // corresponding vertical and level
+            // in the map
+            nodes[x][y].insert(temp->data);
+            
+            // Process left child
+            if(temp->left){
+                todo.push({
+                    temp->left,
+                    {
+                        // Move left in
+                        // terms of vertical
+                        x-1, 
+                        // Move down in
+                        // terms of level
+                        y+1  
+                    }
+                });
+            }
+            
+            // Process right child
+            if(temp->right){
+                todo.push({
+                    temp->right, 
+                    {
+                        // Move right in
+                        // terms of vertical
+                        x+1, 
+                        // Move down in
+                        // terms of level
+                        y+1  
+                    }
+                });
+            }
+        }
+        
+        // Prepare the final result vector
+        // by combining values from the map
+        vector<vector<int>> ans;
+        for(auto p: nodes){
+            vector<int> col;
+            for(auto q: p.second){
+                // Insert node values
+                // into the column vector
+                col.insert(col.end(), q.second.begin(), q.second.end());
+            }
+            // Add the column vector
+            // to the final result
+            ans.push_back(col);
+        }
+        return ans;
+    }
+};
+
+// Helper function to
+// print the result
+void printResult(const vector<vector<int>>& result) {
+    for(auto level: result){
+        for(auto node: level){
+            cout << node << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+// Given a Binary Tree, return its Top View. The Top View of a Binary Tree is the set of nodes visible when we see the tree from the top.
+// Function to return the
+    // top view of the binary tree
+    vector<int> topView(Node* root){
+        // Vector to store the result
+        vector<int> ans;
+        
+        // Check if the tree is empty
+        if(root == NULL){
+            return ans;
+        }
+        
+        // Map to store the top view nodes
+        // based on their vertical positions
+        map<int, int> mpp;
+        
+        // Queue for BFS traversal, each element
+        // is a pair containing node 
+        // and its vertical position
+        queue<pair<Node*, int>> q;
+        
+        // Push the root node with its vertical
+        // position (0) into the queue
+        q.push({root, 0});
+        
+        // BFS traversal
+        while(!q.empty()){
+            // Retrieve the node and its vertical
+            // position from the front of the queue
+            auto it = q.front();
+            q.pop();
+            Node* node = it.first;
+            int line = it.second;
+            
+            // If the vertical position is not already
+            // in the map, add the node's data to the map
+            if(mpp.find(line) == mpp.end()){
+                mpp[line] = node->data;
+            }
+            
+            // Process left child
+            if(node->left != NULL){
+                // Push the left child with a decreased
+                // vertical position into the queue
+                q.push({node->left, line - 1});
+            }
+            
+            // Process right child
+            if(node->right != NULL){
+                // Push the right child with an increased
+                // vertical position into the queue
+                q.push({node->right, line + 1});
+            }
+        }
+        
+        // Transfer values from the
+        // map to the result vector
+        for(auto it : mpp){
+            ans.push_back(it.second);
+        }
+        
+        return ans;
+    }
+
+
+
+// 
+// Function to return the
+    // bottom view of the binary tree
+    vector<int> bottomView(Node* root){
+        // Vector to store the result
+        vector<int> ans;
+        
+        // Check if the tree is empty
+        if(root == NULL){
+            return ans;
+        }
+        
+        // Map to store the bottom view nodes
+        // based on their vertical positions
+        map<int, int> mpp;
+        
+        // Queue for BFS traversal, each
+        // element is a pair containing node
+        // and its vertical position
+        queue<pair<Node*, int>> q;
+        
+        // Push the root node with its vertical
+        // position (0) into the queue
+        q.push({root, 0});
+        
+        // BFS traversal
+        while(!q.empty()){
+            // Retrieve the node and its vertical
+            // position from the front of the queue
+            auto it = q.front();
+            q.pop();
+            Node* node = it.first;
+            int line = it.second;
+            
+            // Update the map with the node's data
+            // for the current vertical position
+            mpp[line] = node->data;
+            
+            // Process left child
+            if(node->left != NULL){
+                // Push the left child with a decreased
+                // vertical position into the queue
+                q.push({node->left, line - 1});
+            }
+            
+            // Process right child
+            if(node->right != NULL){
+                // Push the right child with an increased
+                // vertical position into the queue
+                q.push({node->right, line + 1});
+            }
+        }
+        
+        // Transfer values from the
+        // map to the result vector
+        for(auto it : mpp){
+            ans.push_back(it.second);
+        }
+        
+        return ans;
+    }
+
+
+// Given a Binary Tree, return its right and left views.
+
+
+// Node structure for the binary tree
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    // Constructor to initialize
+    // the node with a value
+    Node(int val) : data(val),
+        left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    // Function to return the
+    // Right view of the binary tree
+    vector<int> rightsideView(Node* root) {
+        // Vector to store
+        // the result
+        vector<int> res;
+
+        // Get the level order
+        // traversal of the tree
+        vector<vector<int>> levelTraversal = levelOrder(root);
+
+        // Iterate through each level and
+        // add the last element to the result
+        for (auto level : levelTraversal) {
+            res.push_back(level.back());
+        }
+
+        return res;
+    }
+
+    // Function to return the
+    // Left view of the binary tree
+    vector<int> leftsideView(Node* root) {
+        // Vector to store the result
+        vector<int> res;
+
+        // Get the level order
+        // traversal of the tree
+        vector<vector<int>> levelTraversal = levelOrder(root);
+
+        // Iterate through each level and
+        // add the first element to the result
+        for (auto level : levelTraversal) {
+            res.push_back(level.front());
+        }
+
+        return res;
+    }
+
+private:
+    // Function that returns the
+    // level order traversal of a Binary tree 
+    vector<vector<int>> levelOrder(Node* root) {
+        vector<vector<int>> ans;
+
+        // Return an empty vector
+        // if the tree is empty
+        if (!root) {
+            return ans;
+        }
+
+        // Use a queue to perform
+        // level order traversal
+        queue<Node*> q;
+        q.push(root);
+
+        while (!q.empty()) {
+            int size = q.size();
+            vector<int> level;
+
+            // Process each node
+            // in the current level
+            for (int i = 0; i < size; i++) {
+                Node* top = q.front();
+                level.push_back(top->data);
+                q.pop();
+
+                // Enqueue the left
+                // child if it exists
+                if (top->left != NULL) {
+                    q.push(top->left);
+                }
+
+                // Enqueue the right
+                // child if it exists
+                if (top->right != NULL) {
+                    q.push(top->right);
+                }
+            }
+
+            // Add the current
+            // level to the result
+            ans.push_back(level);
+        }
+
+        return ans;
+    }
+};
+
+
+//  Given a Binary Tree, determine whether the given tree is symmetric or not.
+// Node structure for the binary tree
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    // Constructor to initialize
+    // the node with a value
+    Node(int val) : data(val), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+private:
+    // Function to check if
+    // two subtrees are symmetric
+    bool isSymmetricUtil(Node* root1, Node* root2) {
+        // Check if either subtree is NULL
+        if (root1 == NULL || root2 == NULL) {
+            // If one subtree is NULL, the other
+            // must also be NULL for symmetry
+            return root1 == root2;
+        }
+        // Check if the data in the current nodes is equal
+        // and recursively check for symmetry in subtrees
+        return (root1->data == root2->data)
+            && isSymmetricUtil(root1->left, root2->right)
+            && isSymmetricUtil(root1->right, root2->left);
+    }
+
+public:
+    // Public function to check if the
+    // entire binary tree is symmetric
+    bool isSymmetric(Node* root) {
+        // Check if the tree is empty
+        if (!root) {
+            // An empty tree is
+            // considered symmetric
+            return true;
+        }
+        // Call the utility function
+        // to check symmetry of subtrees
+        return isSymmetricUtil(root->left, root->right);
+    }
+};
